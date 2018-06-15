@@ -7,7 +7,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SeleniumTest
+namespace CountryInformationDB
 {
     class HttpRequestConfiguration
     {

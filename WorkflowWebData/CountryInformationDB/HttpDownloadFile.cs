@@ -8,7 +8,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SeleniumTest
+namespace CountryInformationDB
 {
     class HttpDownloadFile
     {
@@ -84,7 +84,7 @@ namespace SeleniumTest
             }
             else
             {
-                LocalFile += format.ToString();
+                LocalFile += GetExtension(format);
                 LocalFile = Path.Combine(localPath, LocalFile);
                 using (var image = Image.FromStream(stream))
                 {
@@ -102,6 +102,13 @@ namespace SeleniumTest
         public ImageFormat GetFormat(string text)
         {
             return (ImageFormat)Enum.Parse(typeof(ImageFormat), text);
+        }
+
+        public string GetExtension(ImageFormat format)
+        {
+            if (format == ImageFormat.Bmp) return ".bmp";
+            else if (format == ImageFormat.Jpeg) return ".jpg";
+            else return "";
         }
     }
 }

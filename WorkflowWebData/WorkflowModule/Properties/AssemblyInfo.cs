@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("SeleniumTest")]
+[assembly: AssemblyTitle("WorkflowModule")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SeleniumTest")]
-[assembly: AssemblyCopyright("Copyright ©  2018")]
+[assembly: AssemblyCompany("Credit Suisse")]
+[assembly: AssemblyProduct("WorkflowModule")]
+[assembly: AssemblyCopyright("Copyright © Credit Suisse 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("31e51d6d-975c-45ca-8910-07613ca726e8")]
+[assembly: Guid("d65a3d64-f327-4c8c-92b9-070d3ad4a232")]
 
 // Version information for an assembly consists of the following four values:
 //
