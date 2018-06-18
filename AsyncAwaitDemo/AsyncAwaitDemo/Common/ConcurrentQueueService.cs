@@ -17,10 +17,10 @@ namespace AsyncAwaitDemo
     public class ConcurrentQueueService
     {
         ConcurrentQueue<QueueAction> _queue;
-        int maxParallelTasks = 10;
         public event ProcessActionEventHandler ProcessAction;
 
         public bool Completed { get; internal set; } = false;
+        public int maxParallelTasks { get; set; } = 10;
 
         public ConcurrentQueueService()
         {

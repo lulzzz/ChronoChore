@@ -55,17 +55,17 @@
     <Compile Include="Angular\XPath\AngleSharp.XPath.Extension.cs" />
     <Compile Include="Angular\XPath\HtmlDocumentNavigable.cs" />
     <Compile Include="Angular\XPath\HtmlDocumentNavigator.cs" />
-    <Compile Include="ConcurrentQueueService.cs" />
-    <Compile Include="DownloadFileQueue.cs" />
-    <Compile Include="HttpDownloadFile.cs" />
-    <Compile Include="HttpRequestAndLoad.cs" />
-    <Compile Include="HttpRequestConfiguration.cs" />
-    <Compile Include="IndexFile.cs" />
-    <Compile Include="ProcessActionEventHandler.cs" />
+    <Compile Include="Common\ConcurrentQueueService.cs" />
+    <Compile Include="DownloadWebPage.cs" />
+    <Compile Include="Web\DownloadFileQueue.cs" />
+    <Compile Include="Web\HttpRequestAndLoad.cs" />
+    <Compile Include="Web\HttpRequestConfiguration.cs" />
+    <Compile Include="Common\IndexFile.cs" />
+    <Compile Include="Web\ProcessActionEventHandler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestConcurrentQueue.cs" />
-    <Compile Include="LogWrapTimer.cs" />
+    <Compile Include="Common\LogWrapTimer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

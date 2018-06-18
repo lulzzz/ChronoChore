@@ -18,5 +18,5 @@ namespace AsyncAwaitDemo
         }
     }
 
-    public delegate void ProcessActionEventHandler(ProcessActionEventArgs);
+    public delegate void ProcessActionEventHandler(ProcessActionEventArgs args);
 }
