@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace AsyncAwaitDemo
 {
@@ -13,7 +14,8 @@ namespace AsyncAwaitDemo
         protected static ILog logger = LogManager.GetLogger(typeof(IndexFile));
 
         string indexFile = "index.txt";
-        Dictionary<string, string> cachedFiles = new Dictionary<string, string>();
+        ConcurrentDictionary<string, string> cachedFiles = new ConcurrentDictionary<string, string>();
+        ConcurrentDictionary<string, bool> downloadCompletedFiles = new ConcurrentDictionary<string, bool>();
 
         public string LocalFolder { get; protected set; }
 
@@ -41,7 +43,7 @@ namespace AsyncAwaitDemo
                 while ((lineText = reader.ReadLine()) != null)
                 {
                     var splits = lineText.Split(',');
-                    cachedFiles.Add(splits[0], splits[1]);
+                    cachedFiles.TryAdd(splits[0], splits[1]);
                 }
             }
         }
@@ -59,7 +61,8 @@ namespace AsyncAwaitDemo
                 else
                 {
                     fileName = GenerateFileName(key);
-                    cachedFiles.Add(key, fileName);
+                    cachedFiles.TryAdd(key, fileName);
+                    downloadCompletedFiles.TryAdd(key, false);
                 }
             }
         }
@@ -77,6 +80,16 @@ namespace AsyncAwaitDemo
         public string Value(string key)
         {
             return cachedFiles[key];
+        }
+
+        public bool IsDownloaded(string key)
+        {
+            return downloadCompletedFiles.ContainsKey(key) && downloadCompletedFiles[key];
+        }
+
+        public void CompleteDownload(string key)
+        {
+            downloadCompletedFiles[key] = true;
         }
     }
 }

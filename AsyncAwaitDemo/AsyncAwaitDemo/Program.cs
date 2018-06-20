@@ -34,11 +34,10 @@ namespace AsyncAwaitDemo
                 var downloadQueue = new DownloadFileQueue()
                 {
                     Extension = ".jpg",
-                    LocalFolder = "Flags",
                     AsyncMode = false
                 };
 
-                downloadQueue.Setup();
+                downloadQueue.Setup("Flags");
 
                 foreach (IElement flagHref in flagsHref)
                 {

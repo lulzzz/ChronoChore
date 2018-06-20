@@ -30,7 +30,7 @@ namespace AsyncAwaitDemo
             {
                 service = new ConcurrentQueueService();
                 consumer = Task.Factory.StartNew(service.Dequeue);
-            }
+            }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
         }
 
         public void Wait()
@@ -45,7 +45,7 @@ namespace AsyncAwaitDemo
 
         
 
-        public void AddTask(string url)
+        public void AddTask(string url, string extension = default(string))
         {
             logger.Debug($"Add download task ${url}");
 
@@ -55,7 +55,7 @@ namespace AsyncAwaitDemo
             if(!indexFile.Contains(uriNormalized.AbsoluteUri) ||
                 (indexFile.Contains(uriNormalized.AbsoluteUri) && Redownload))
             {
-                indexFile.Cache(uriNormalized.AbsoluteUri, Extension);
+                indexFile.Cache(uriNormalized.AbsoluteUri, extension??Extension);
 
                 if (AsyncMode)
                     service.Enqueue(() => Download(uriNormalized.AbsoluteUri,
@@ -82,8 +82,7 @@ namespace AsyncAwaitDemo
                 webclient.DownloadFile(url, Path.Combine(indexFile.LocalFolder, fileName));
             }
             logger.Debug($"End download task ${url} to ${fileName}");
-        }
-
-        
+            indexFile.CompleteDownload(url);
+        }        
     }
 }
