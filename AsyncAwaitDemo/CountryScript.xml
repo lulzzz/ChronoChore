@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<countryScript>
+  <ISO3166CountryCodes>
+    <NavigateToUrl a1="https://www.iso.org/iso-3166-country-codes.html">
+      <ExtractParagraph a1="//body/div[1]/div[2]/div[2]/p[1]" topic="About ISO"></ExtractParagraph>
+      <ExtractParagraph a1="//body/div[1]/div[2]/div[2]/p[2]" a2="(Extract only First Statement delimited by dot)1" topic="About ISO"></ExtractParagraph>
+      <ExtractParagraph a1="//body/div[1]/div[2]/div[3]/div[1]/p[2]" topic="ISO 3166 Maintenance Agency Address"></ExtractParagraph>
+      <ExtractInnerHtml a1="//body/div[1]/div[2]/div[3]/div[1]/p[3]">
+        <SplitString a1="&lt;br&gt;">
+          <ReplaceString a1="0" a2="Telephone: " topic="ISO 3166 Maintenance Agency Address Telephone"></ReplaceString>
+          <Index a1="1" topic="ISO 3166 Maintenance Agency Address Email"></Index>
+        </SplitString>
+      </ExtractInnerHtml>
+      <ExtractText a1="//body/div[1]/div[3]/div[3]/div[1]/p/a" topic="Actual full name of current ISO 3166 Standard"></ExtractText>
+      <ExtractHref a1="//body/div[1]/div[3]/div[2]/p[1]/a" topic="Online Browsing Platform" >
+        <NavigateUrl></NavigateUrl>
+        <ExtractTableRows a1="//table[contains(@class, 'v-table-table')]//tr" topic="List of Countries"></ExtractTableRows>
+        <ForLoop>
+          <ExtractText a1=".//span[@class, 'v-button-caption')]" topic="Country Name"></ExtractText>
+          <ClickNode a1=".//div[@role, 'button')]"></ClickNode>
+        </ForLoop>
+      </ExtractHref>
+    </NavigateToUrl>
+  </ISO3166CountryCodes>
+</countryScript>
