@@ -90,8 +90,14 @@
     <Compile Include="Angular\XPath\HtmlDocumentNavigable.cs" />
     <Compile Include="Angular\XPath\HtmlDocumentNavigator.cs" />
     <Compile Include="Common\ConcurrentQueueService.cs" />
+    <Compile Include="DataFlow\Country\DB\Model\CountryAdministrativeDivisionsTable.cs" />
+    <Compile Include="DataFlow\Country\DB\Model\CountryAdministrativeLanguages.cs" />
     <Compile Include="DataFlow\Country\DB\Model\CountryDatabase.cs" />
     <Compile Include="DataFlow\Country\DB\BL\CountryDataStore.cs" />
+    <Compile Include="DataFlow\Country\DB\Model\CountryInformation.cs" />
+    <Compile Include="DataFlow\Country\DB\Model\CountryPrimaryAdministrativeDivisions.cs" />
+    <Compile Include="DataFlow\Country\DB\Model\EAdministrativeDivisionType.cs" />
+    <Compile Include="DataFlow\Country\DB\Model\ISO3166MaintenanceAgencyRepresentatives.cs" />
     <Compile Include="DataFlow\Country\DB\Model\ISO3166Metadata.cs" />
     <Compile Include="Persistence\DBColumnModel.cs" />
     <Compile Include="Persistence\Model\DBColumnAttribute.cs" />
