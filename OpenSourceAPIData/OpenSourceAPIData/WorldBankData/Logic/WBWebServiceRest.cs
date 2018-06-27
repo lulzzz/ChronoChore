@@ -10,68 +10,74 @@ using System.Xml;
 using System.Xml.XPath;
 using WebScrap.Common;
 using WebScrap.LibExtension.XPath;
+using CountryInformationDB;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net;
 
 namespace OpenSourceAPIData.WorldBankData.Logic
 {
-    public class WBWebServiceRest
+    public class WBWebServiceRest<T> where T : class
     {
         protected string Api { get; set; }
+        protected string RootXPath { get; set; }
 
-        protected int currentPage = 1;
+        protected int localCurrentPageIterator = 0;
+        protected int currentPage = 0;
         protected int totalPages = 0;
         protected int perPage = 0;
         protected int totalCount = 0;
         protected XmlParser parser;
 
+        public List<T> Result;
+
         public void Read()
         {
             do
             {
-                var httpRequest = new HttpRequestAndLoad();
-                var responseXml = httpRequest.LoadAsStream(Api);
+                localCurrentPageIterator++;
+                SetApi();
+                var config = new HttpRequestConfiguration();
 
-                // Parse
-                //parser = new XmlParser();
-                //var rootElement = parser.Parse(responseXml).DocumentElement;
+                var httpRequest = new HttpRequestAndLoad(config);
+                var responseXml = httpRequest.Load(Api);
 
-                XPathDocument document = new XPathDocument(XmlReader.Create(responseXml));
-                XPathNavigator navigator = document.CreateNavigator();
-                XmlNamespaceManager manager = new XmlNamespaceManager(navigator.NameTable);
-                manager.AddNamespace("wb", "http://www.worldbank.org");
-
-                XPathNodeIterator nodes = navigator.Select("//wb:topic", manager);
-
-                if (nodes.MoveNext())
-                {
-                    // now nodes.Current points to the first selected node
-                    XPathNavigator nodesNavigator = nodes.Current;
-
-                    //select all the descendants of the current price node
-                    XPathNodeIterator nodesText =
-                       nodesNavigator.SelectDescendants(XPathNodeType.Text, false);
-
-                    while (nodesText.MoveNext())
-                    {
-                        Console.WriteLine(nodesText.Current.Value);
-                    }
-                }
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(responseXml);
+                XmlElement el = doc.DocumentElement; //TODO
+                XmlNamespaceManager nsmgr = new XmlNamespaceManager(
+                    doc.NameTable);
+                nsmgr.AddNamespace("wb", el.OwnerDocument.DocumentElement.NamespaceURI);
 
                 // Read header
-                //IElement topicsNode = (IElement)rootElement.SelectSingleNode("//topics");
-                //currentPage = Convert.ToInt32(topicsNode.GetAttribute("page"));
-                //totalPages = Convert.ToInt32(topicsNode.GetAttribute("pages"));
-                //perPage = Convert.ToInt32(topicsNode.GetAttribute("per_page"));
-                //totalCount = Convert.ToInt32(topicsNode.GetAttribute("total"));
+                IElement topicsNode = (IElement)el.SelectSingleNode(RootXPath);
+                currentPage = Convert.ToInt32(topicsNode.GetAttribute("page"));
+                totalPages = Convert.ToInt32(topicsNode.GetAttribute("pages"));
+                perPage = Convert.ToInt32(topicsNode.GetAttribute("per_page"));
+                totalCount = Convert.ToInt32(topicsNode.GetAttribute("total"));
 
-                // Read Nodes
-                //ReadNodes(rootElement.SelectNodes("//wb:topic"));
+                // Read Topics Nodes
+                ReadNodes(el.SelectNodes("//wb:topic"));
             }
-            while (perPage > 0 && currentPage < totalPages);
+            while (perPage > 0 && currentPage < totalPages && localCurrentPageIterator != currentPage);
         }
 
-        protected virtual void ReadNodes(List<INode> list)
+        protected virtual void ReadNodes(XmlNodeList nodes)
         {
-            throw new NotImplementedException();
+            foreach (XmlNode node in nodes)
+            {
+                ReadNode(node);
+            }
+        }
+
+        protected virtual void ReadNode(XmlNode node)
+        {
+            
+        }
+
+        protected virtual void SetApi()
+        {
+
         }
     }
 }

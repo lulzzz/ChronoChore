@@ -111,5 +111,44 @@ namespace WebScrap.LibExtension.XPath
 
             return result;
         }
+
+        /// <summary>
+        /// Selects a list of nodes matching the <see cref="XPath"/> expression.
+        /// </summary>
+        /// <param name="element"></param>
+        /// <param name="xpath">The XPath expression.</param>
+        /// <returns>List of nodes matching <paramref name="xpath"/> query.</returns>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="element"/> or <paramref name="xpath"/> is <c>null</c></exception>
+        public static List<INode> SelectNodes(this IElement element, string xpath, Dictionary<string, string> namespaces)
+        {
+            if (element == null)
+            {
+                throw new ArgumentNullException(nameof(element));
+            }
+
+            if (xpath == null)
+            {
+                throw new ArgumentNullException(nameof(xpath));
+            }
+
+            var nav = new HtmlDocumentNavigator(element.Owner, element);
+
+            foreach (var item in namespaces)
+            {
+                nav.AddNamespace(item.Key, item.Value);
+            }
+
+            var it = nav.SelectWithNamespace(xpath);
+            var result = new List<INode>();
+
+            while (it.MoveNext())
+            {
+                var naviagtor = (HtmlDocumentNavigator)(it.Current);
+                var e = naviagtor.CurrentNode;
+                result.Add(e);
+            }
+
+            return result;
+        }
     }
 }

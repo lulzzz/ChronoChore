@@ -8,27 +8,30 @@ using System.Text;
 using System.Threading.Tasks;
 using WebScrap.Common;
 using WebScrap.LibExtension.XPath;
+using System.Xml;
 
 namespace OpenSourceAPIData.WorldBankData.Logic
 {
-    public class WBTopicsWebServiceRest : WBWebServiceRest
+    public class WBTopicsWebServiceRest : WBWebServiceRest<TopicsTable>
     {
         public WBTopicsWebServiceRest()
         {
-            Api = $"http://api.worldbank.org/v2/topics?page={currentPage}";
+            RootXPath = @"//topics";
         }
 
-        protected override void ReadNodes(List<INode> list)
+        protected override void ReadNode(XmlNode node)
         {
-            foreach (IElement item in list)
+            Result.Add(new TopicsTable
             {
-                var topicsObj = new TopicsTable
-                {
-                    Id = Convert.ToInt32(item.GetAttribute("id")),
-                    Value = item.SelectSingleNode(".//wb:value").TextContent,
-                    SourceNote = item.SelectSingleNode(".//wb:sourceNote").TextContent,
-                };
-            }
+                Id = Convert.ToInt32(node.Attributes["id"]),
+                Value = node.SelectSingleNode(".//wb:value").Value,
+                SourceNote = node.SelectSingleNode(".//wb:sourceNote").Value,
+            });
+        }
+
+        protected override void SetApi()
+        {
+            Api = $"https://api.worldbank.org/v2/topics?page={localCurrentPageIterator}";
         }
     }
 }

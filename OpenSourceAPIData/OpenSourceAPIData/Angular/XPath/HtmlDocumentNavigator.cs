@@ -2,6 +2,9 @@
 using System;
 using System.Xml;
 using System.Xml.XPath;
+using System.Linq;
+using System.Collections.Generic;
+using System.IO;
 
 namespace WebScrap.LibExtension.XPath
 {
@@ -13,6 +16,8 @@ namespace WebScrap.LibExtension.XPath
         #region Fields
 
         private XmlNamespaceManager manager;
+        private XPathNavigator navigator;
+        private XPathDocument pathDocument;
 
         /// <summary>
         /// Refers to the Html document
@@ -35,6 +40,16 @@ namespace WebScrap.LibExtension.XPath
 
         #region Constructor
 
+        public static Stream GenerateStreamFromString(string s)
+        {
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            writer.Write(s);
+            writer.Flush();
+            stream.Position = 0;
+            return stream;
+        }
+
         /// <summary>
         /// Default constructor
         /// </summary>
@@ -49,7 +64,9 @@ namespace WebScrap.LibExtension.XPath
             _currentNode = currentNode;
             _nameTable = new NameTable();
             _attrIndex = -1;
-            manager = new XmlNamespaceManager(_nameTable);
+            pathDocument = new XPathDocument(GenerateStreamFromString(_document.DocumentElement.OuterHtml));
+            navigator = pathDocument.CreateNavigator();
+            manager = new XmlNamespaceManager(navigator.NameTable);
         }
 
         #endregion Constructor
@@ -254,6 +271,16 @@ namespace WebScrap.LibExtension.XPath
         #endregion Properties
 
         #region Methods
+
+        public void AddNamespace(string name, string uri)
+        {
+            manager.AddNamespace(name, uri);
+        }
+
+        public XPathNodeIterator SelectWithNamespace(string xpath)
+        {
+            return navigator.Select("//wb:topic", manager);
+        }
 
         /// <summary>
         /// Create and return a clone of the current navigator

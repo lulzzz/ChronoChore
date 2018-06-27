@@ -82,6 +82,8 @@
     <Compile Include="Common\HttpRequestAndLoad.cs" />
     <Compile Include="Common\HttpRequestConfiguration.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
+    <Compile Include="Persistence\Logic\DBContextBase.cs" />
+    <Compile Include="Persistence\Logic\PersistenceManager.cs" />
     <Compile Include="Persistence\Logic\SqlitePersistContext.cs" />
     <Compile Include="Persistence\Models\ColumnInformation.cs" />
     <Compile Include="Persistence\Models\DBColumnAttribute.cs" />
@@ -92,6 +94,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WorldBankData\Logic\WBTopicsWebServiceRest.cs" />
     <Compile Include="WorldBankData\Logic\WBWebServiceRest.cs" />
+    <Compile Include="WorldBankData\Model\BaseTable.cs" />
     <Compile Include="WorldBankData\Model\CountryTable.cs" />
     <Compile Include="WorldBankData\Model\IndicatorsTable.cs" />
     <Compile Include="WorldBankData\Model\TopicsIndicatorsRelationTable.cs" />

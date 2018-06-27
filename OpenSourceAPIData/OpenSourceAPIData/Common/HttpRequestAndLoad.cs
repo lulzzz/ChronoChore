@@ -10,6 +10,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Net.Cache;
 
 namespace WebScrap.Common
 {
@@ -82,6 +83,7 @@ namespace WebScrap.Common
             httpWebRequestObj.ImpersonationLevel = configuration.ImpersonationLevel;
             httpWebRequestObj.KeepAlive = configuration.KeepAlive;
             httpWebRequestObj.UserAgent = configuration.UserAgent;
+            httpWebRequestObj.Accept = "*/*";
         }
 
         /// <summary>

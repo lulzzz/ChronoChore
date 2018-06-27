@@ -62,8 +62,8 @@ namespace CountryInformationDB
             Credrntials = CredentialCache.DefaultNetworkCredentials;
             AuthLevel = AuthenticationLevel.None;
             ImpersonationLevel = TokenImpersonationLevel.None;
-            KeepAlive = false;
-            UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:31.0) Gecko/20100101 Firefox/31.0";
+            KeepAlive = true;
+            UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.119 Safari/5";
             SecurityProtocol = SecurityProtocolType.Ssl3 |
                 SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
         }
