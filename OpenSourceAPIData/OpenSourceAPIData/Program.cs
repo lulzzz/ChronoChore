@@ -1,28 +1,29 @@
-﻿using OpenSourceAPIData.Persistence.Logic;
+﻿using log4net;
+using OpenSourceAPIData.Persistence.Logic;
 using OpenSourceAPIData.WorldBankData.Logic;
 using OpenSourceAPIData.WorldBankData.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AngleSharp.Parser.Xml;
-using WebScrap.LibExtension.XPath;
 
 namespace OpenSourceAPIData
 {
     class Program
     {
+        protected static ILog logger = LogManager.GetLogger(typeof(Program));
+
         static void Main(string[] args)
         {
-            using (var sqliteContext = new SqlitePersistContext("WorldBank"))
+            using (var persistenceManager = new PersistenceManager("WorldBank",
+                (topic) => new SqlitePersistContext(topic)))
             {
                 // Create the database
                 var databaseModel = new WorldBankOrgOSDatabase();
-                databaseModel.Create(sqliteContext);
+                databaseModel.Create(persistenceManager);
 
                 var wbTopics = new WBTopicsWebServiceRest();
+                wbTopics.persistenceManager = persistenceManager;
+                wbTopics.Database = databaseModel;
                 wbTopics.Read();
+
+                //databaseModel.Topics.Save(wbTopics.Result, persistenceManager);
             }
         }
     }

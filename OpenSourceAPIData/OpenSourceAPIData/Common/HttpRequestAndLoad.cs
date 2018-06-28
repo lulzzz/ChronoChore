@@ -6,11 +6,11 @@
 #endregion
 using CountryInformationDB;
 using log4net;
+using OpenSourceAPIData.Common;
 using System;
 using System.IO;
 using System.Net;
 using System.Text;
-using System.Net.Cache;
 
 namespace WebScrap.Common
 {
@@ -84,6 +84,7 @@ namespace WebScrap.Common
             httpWebRequestObj.KeepAlive = configuration.KeepAlive;
             httpWebRequestObj.UserAgent = configuration.UserAgent;
             httpWebRequestObj.Accept = "*/*";
+            httpWebRequestObj.Timeout = 1000000;
         }
 
         /// <summary>
@@ -100,6 +101,8 @@ namespace WebScrap.Common
             logger.DebugFormat("Try to Load The Url: \"{0}\"", url);
             uriPath = new Uri(url);
 
+            // escape proxy
+            ServicePointManager.Expect100Continue = false;
             ServicePointManager.SecurityProtocol = configuration.SecurityProtocol;
             ServicePointManager.ServerCertificateValidationCallback +=
                 (sender, cert, chain, error) =>
@@ -185,7 +188,8 @@ namespace WebScrap.Common
         /// <param name="url"></param>
         /// <param name="xPath"></param>
         /// <returns></returns>
-        public string Load(string url) => Load(url, ManipulateWebStreamForPage);
+        public string Load(string url) => RetryLogic.Do(
+            () => Load(url, ManipulateWebStreamForPage), TimeSpan.FromSeconds(1));
 
         /// <summary>
         /// Load a file from the online or offline

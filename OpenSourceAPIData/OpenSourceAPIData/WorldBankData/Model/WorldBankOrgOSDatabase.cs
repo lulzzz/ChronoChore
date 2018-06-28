@@ -1,28 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OpenSourceAPIData.Persistence.Models;
+﻿using OpenSourceAPIData.Persistence.Models;
 using OpenSourceAPIData.Persistence.Logic;
 
 namespace OpenSourceAPIData.WorldBankData.Model
 {
     [DBDatabase]
-    class WorldBankOrgOSDatabase
+    public class WorldBankOrgOSDatabase
     {
         public CountryTable Countries { get; set; }
         public TopicsTable Topics { get; set; }
         public IndicatorsTable Indicators { get; set; }
         public TopicsIndicatorsRelationTable TopicsIndicators { get; set; }
 
-        public void Create(SqlitePersistContext context)
+        public WorldBankOrgOSDatabase()
         {
-            context.CreateDatabase("WorldBankOrganisation");
-            Topics.Create(context);
-            Indicators.Create(context);
-            Countries.Create(context);
-            TopicsIndicators.Create(context);
+            Countries = new CountryTable();
+            Topics = new TopicsTable();
+            Indicators = new IndicatorsTable();
+            TopicsIndicators = new TopicsIndicatorsRelationTable();
+        }
+
+        public void Create(PersistenceManager persistenceManager)
+        {
+            persistenceManager.CreateStore("WorldBankOrganisation");
+            Topics.Create(persistenceManager);
+            Indicators.Create(persistenceManager);
+            Countries.Create(persistenceManager);
+            TopicsIndicators.Create(persistenceManager);
         }
     }
 }

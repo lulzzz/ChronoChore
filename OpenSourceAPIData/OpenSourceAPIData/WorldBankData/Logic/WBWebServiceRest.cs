@@ -1,65 +1,104 @@
-﻿using AngleSharp.Dom;
-using AngleSharp.Parser.Xml;
-using System;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-using System.Xml.XPath;
-using WebScrap.Common;
-using WebScrap.LibExtension.XPath;
 using CountryInformationDB;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Net;
+using OpenSourceAPIData.Persistence.Logic;
+using OpenSourceAPIData.WorldBankData.Model;
+using WebScrap.Common;
 
 namespace OpenSourceAPIData.WorldBankData.Logic
 {
     public class WBWebServiceRest<T> where T : class
     {
         protected string Api { get; set; }
+        protected string queryParamsForPage
+        {
+            get
+            {
+                return QueryParamsForPage(pagingConfig);
+            }
+        }
+        protected string XpathNodes { get; set; }
+
+        protected WBWebServicePaging pagingConfig;
+        protected WBWebServicePaging pagingCounter;
+        protected XmlNamespaceManager nsmgr;
         protected string RootXPath { get; set; }
+        public PersistenceManager persistenceManager { get; set; }
+        public WorldBankOrgOSDatabase Database { get; set; }
 
-        protected int localCurrentPageIterator = 0;
-        protected int currentPage = 0;
-        protected int totalPages = 0;
-        protected int perPage = 0;
-        protected int totalCount = 0;
-        protected XmlParser parser;
+        public ConcurrentBag<T> Result;
 
-        public List<T> Result;
+        public WBWebServiceRest()
+        {
+            Result = new ConcurrentBag<T>();
+            Initialize();
+        }
+
+        protected virtual void Initialize()
+        {
+            pagingConfig = new WBWebServicePaging()
+            {
+                PageNumber = 1,
+                PerPageCount = 10
+            };
+            pagingCounter = pagingConfig.Clone();
+        }
+
+        protected string QueryParamsForPage(WBWebServicePaging pagingConfig)
+        {
+            var queryParams = new List<string>();
+
+            if (pagingConfig.PageNumber > 0) queryParams.Add($"page={pagingConfig.PageNumber}");
+            if (pagingConfig.PerPageCount > 0) queryParams.Add($"per_page={pagingConfig.PerPageCount}");
+
+            return string.Join("&", queryParams);
+        }
 
         public void Read()
         {
-            do
+            SetApi();
+            var doc = RequestXmlResponse(Api);
+            var el = doc.DocumentElement;
+
+            // Read header
+            var rootNode = el.SelectSingleNode(RootXPath, nsmgr);
+            SetPagingCounter(rootNode);
+
+            var ApiRequestList = new List<string>();
+            for (int i = 2; i <= pagingCounter.TotalPages; i++)
             {
-                localCurrentPageIterator++;
-                SetApi();
-                var config = new HttpRequestConfiguration();
-
-                var httpRequest = new HttpRequestAndLoad(config);
-                var responseXml = httpRequest.Load(Api);
-
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml(responseXml);
-                XmlElement el = doc.DocumentElement; //TODO
-                XmlNamespaceManager nsmgr = new XmlNamespaceManager(
-                    doc.NameTable);
-                nsmgr.AddNamespace("wb", el.OwnerDocument.DocumentElement.NamespaceURI);
-
-                // Read header
-                IElement topicsNode = (IElement)el.SelectSingleNode(RootXPath);
-                currentPage = Convert.ToInt32(topicsNode.GetAttribute("page"));
-                totalPages = Convert.ToInt32(topicsNode.GetAttribute("pages"));
-                perPage = Convert.ToInt32(topicsNode.GetAttribute("per_page"));
-                totalCount = Convert.ToInt32(topicsNode.GetAttribute("total"));
-
-                // Read Topics Nodes
-                ReadNodes(el.SelectNodes("//wb:topic"));
+                var paging = pagingCounter.Clone();
+                paging.PageNumber = i;
+                ApiRequestList.Add(GetApi(QueryParamsForPage(paging)));
             }
-            while (perPage > 0 && currentPage < totalPages && localCurrentPageIterator != currentPage);
+
+            // Tasks
+            var taskList = new List<Task>();
+            taskList.Add(new Task(() => ReadNodes(el.SelectNodes(XpathNodes, nsmgr))));
+            foreach (var api in ApiRequestList)
+            {
+                taskList.Add(new Task(() => LoadAndRead(api)));
+            }
+
+            taskList.ForEach(task => task.Start());
+            Task.WaitAll(taskList.ToArray());
+        }
+
+        protected virtual string GetApi(string queryParams)
+        {
+            return null;
+        }
+
+        protected virtual void LoadAndRead(string api)
+        {
+            var doc = RequestXmlResponse(api);
+            var el = doc.DocumentElement;
+
+            // Read Topics Nodes
+            ReadNodes(el.SelectNodes(XpathNodes, nsmgr));
         }
 
         protected virtual void ReadNodes(XmlNodeList nodes)
@@ -78,6 +117,31 @@ namespace OpenSourceAPIData.WorldBankData.Logic
         protected virtual void SetApi()
         {
 
+        }
+
+        protected virtual XmlDocument RequestXmlResponse(string api)
+        {
+            var config = new HttpRequestConfiguration();
+
+            var httpRequest = new HttpRequestAndLoad(config);
+            var responseXml = httpRequest.Load(api);
+
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(responseXml);
+            XmlElement el = doc.DocumentElement; //TODO
+            nsmgr = new XmlNamespaceManager(
+                doc.NameTable);
+            nsmgr.AddNamespace("wb", el.OwnerDocument.DocumentElement.NamespaceURI);
+
+            return doc;
+        }
+
+        protected virtual void SetPagingCounter(XmlNode rootNode)
+        {
+            pagingCounter.PageNumber = Convert.ToInt32(rootNode.Attributes["page"].Value);
+            pagingCounter.TotalPages = Convert.ToInt32(rootNode.Attributes["pages"].Value);
+            pagingCounter.PerPageCount = Convert.ToInt32(rootNode.Attributes["per_page"].Value);
+            pagingCounter.TotalCount = Convert.ToInt32(rootNode.Attributes["total"].Value);
         }
     }
 }

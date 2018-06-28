@@ -34,9 +34,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AngleSharp, Version=0.9.9.0, Culture=neutral, PublicKeyToken=e83494dcdc6d31ea, processorArchitecture=MSIL">
-      <HintPath>..\packages\AngleSharp.0.9.9.2\lib\net45\AngleSharp.dll</HintPath>
-    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.0.0\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
@@ -65,24 +62,16 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="WebDriver, Version=3.12.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Selenium.WebDriver.3.12.1\lib\net45\WebDriver.dll</HintPath>
-    </Reference>
-    <Reference Include="WebDriver.Support, Version=3.12.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Selenium.Support.3.12.1\lib\net45\WebDriver.Support.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Angular\IAttr.Extension.cs" />
-    <Compile Include="Angular\IElement.Extension.cs" />
-    <Compile Include="Angular\INode.Extension.cs" />
-    <Compile Include="Angular\XPath\AngleSharp.XPath.Extension.cs" />
-    <Compile Include="Angular\XPath\HtmlDocumentNavigable.cs" />
-    <Compile Include="Angular\XPath\HtmlDocumentNavigator.cs" />
+    <Compile Include="Common\ConcurrentQueueService.cs" />
     <Compile Include="Common\HttpRequestAndLoad.cs" />
     <Compile Include="Common\HttpRequestConfiguration.cs" />
+    <Compile Include="Common\ProcessActionEventHandler.cs" />
+    <Compile Include="Common\RetryLogic.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Persistence\Logic\DBContextBase.cs" />
+    <Compile Include="Persistence\Logic\ExecuteSqliteQueriesQueue.cs" />
     <Compile Include="Persistence\Logic\PersistenceManager.cs" />
     <Compile Include="Persistence\Logic\SqlitePersistContext.cs" />
     <Compile Include="Persistence\Models\ColumnInformation.cs" />
@@ -92,7 +81,9 @@
     <Compile Include="Persistence\Models\DBTableAttribute.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WorldBankData\Logic\WBIndicatorsPerTopicWebServiceRest.cs" />
     <Compile Include="WorldBankData\Logic\WBTopicsWebServiceRest.cs" />
+    <Compile Include="WorldBankData\Logic\WBWebServicePaging.cs" />
     <Compile Include="WorldBankData\Logic\WBWebServiceRest.cs" />
     <Compile Include="WorldBankData\Model\BaseTable.cs" />
     <Compile Include="WorldBankData\Model\CountryTable.cs" />
@@ -103,6 +94,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="log4net.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

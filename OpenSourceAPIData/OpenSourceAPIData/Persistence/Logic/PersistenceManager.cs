@@ -1,31 +1,47 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OpenSourceAPIData.Persistence.Logic
 {
-    public class PersistenceManager
+    public class PersistenceManager : IDisposable
     {
         private string Topic;
-        private DBContextBase context;
+        private Func<string, DBContextBase> contextBuilder;
+        public DBContextBase context;
+        private ExecuteSqliteQueriesQueue executeQueue;
 
-        public PersistenceManager(string topic)
+        public PersistenceManager(string topic, Func<string, DBContextBase> contextBuilder)
         {
             Topic = topic;
+            this.contextBuilder = contextBuilder;
             Directory.CreateDirectory(Topic);
+            context = contextBuilder(Topic);
+            executeQueue = new ExecuteSqliteQueriesQueue();
+            executeQueue.Setup();
         }
 
-        public void CreateStore(string storeName)
+        public void CreateStore(string storeName) => context.CreateDatabase(storeName);
+
+        public void CreateTable(string query) => executeQueue.AddTask(() => context.ExecuteNonQuery(query));
+
+        public void Insert(string query) => executeQueue.AddTask(() => context.Insert(query));
+
+        public void Dispose()
         {
-            context.CreateDatabase(storeName);
+            if (context != null) context.Close();
         }
 
-        public void Execute(string query)
+        private void ThreadSafeContextCall(Action actionMain)
         {
-            using(context = new )
+            try
+            {
+                context.Open();
+                actionMain();
+            }
+            finally
+            {
+                context.Close();
+            }
         }
     }
 }

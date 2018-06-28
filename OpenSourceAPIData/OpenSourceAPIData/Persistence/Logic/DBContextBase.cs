@@ -1,24 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OpenSourceAPIData.Persistence.Logic
 {
     public class DBContextBase : IDisposable
     {
-        private string Topic;
-        private string connectionString;
-        private IDbConnection connection;
+        protected string Topic;
+        protected string connectionString;
+        protected IDbConnection connection;
 
         public DBContextBase(string topic)
         {
             Topic = topic;
             
         }
+
+        public virtual void Open() { }
+        public virtual void Close() { }
 
         public virtual void CreateDatabase(string databaseName) { }
 
@@ -29,5 +27,7 @@ namespace OpenSourceAPIData.Persistence.Logic
             if (connection != null) connection.Close();
             connection = null;
         }
+
+        public virtual void Insert(string query) { }
     }
 }
