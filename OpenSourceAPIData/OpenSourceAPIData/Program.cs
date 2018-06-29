@@ -36,7 +36,7 @@ namespace OpenSourceAPIData
 
         public static void WBWebServiceRestCompletionHandlerInMain<T>(string uniqueName, ConcurrentBag<T> Result)
         {
-
+            logger.Info($"Completed '{uniqueName}' and count")
         }
     }
 }

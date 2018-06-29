@@ -39,12 +39,12 @@ namespace OpenSourceAPIData.WorldBankData.Logic
             var valueText = node.SelectSingleNode(".//wb:value/text()", namespaceManager);
             var sourceNoteText = node.SelectSingleNode(".//wb:sourceNote/text()", namespaceManager);
             
-            config.Database.Topics.Save(new TopicsTable
-            {
-                Id = id,
-                Value = (valueText == null) ? null : valueText.Value,
-                SourceNote = (sourceNoteText == null) ? null : sourceNoteText.Value,
-            }, config.PersistenceManager);
+            //config.Database.Topics.Save(new TopicsTable
+            //{
+            //    Id = id,
+            //    Value = (valueText == null) ? null : valueText.Value,
+            //    SourceNote = (sourceNoteText == null) ? null : sourceNoteText.Value,
+            //}, config.PersistenceManager);
 
             // For each topic fetch indicators
             logger.Info($"Fetch all indicators for topic '{id}'");
@@ -52,24 +52,24 @@ namespace OpenSourceAPIData.WorldBankData.Logic
                 id, config.PersistenceManager, config.Database);
             indicatorsRestObj.Read();
 
-            // Topics and Indicators relation
-            var topicsIndicatorsList = new List<TopicsIndicatorsRelationTable>();
-            foreach (var item in indicatorsRestObj.Result)
-            {
-                logger.Info($"Save indicator id '{item.Id}' for topic '{id}'");
-                config.Database.Indicators.Save(item, config.PersistenceManager);
-                topicsIndicatorsList.Add(new TopicsIndicatorsRelationTable()
-                {
-                    IndicatorsId = item.Id,
-                    TopicsId = id
-                });
-            }
+            //// Topics and Indicators relation
+            //var topicsIndicatorsList = new List<TopicsIndicatorsRelationTable>();
+            //foreach (var item in indicatorsRestObj.Result)
+            //{
+            //    logger.Info($"Save indicator id '{item.Id}' for topic '{id}'");
+            //    config.Database.Indicators.Save(item, config.PersistenceManager);
+            //    topicsIndicatorsList.Add(new TopicsIndicatorsRelationTable()
+            //    {
+            //        IndicatorsId = item.Id,
+            //        TopicsId = id
+            //    });
+            //}
 
-            var valueList = topicsIndicatorsList.Select(item => $"{item.IndicatorsId},{item.TopicsId}").ToList();
-            var valuesQuery = string.Join("\n", valueList);
-            logger.Info(valuesQuery);
+            //var valueList = topicsIndicatorsList.Select(item => $"{item.IndicatorsId},{item.TopicsId}").ToList();
+            //var valuesQuery = string.Join("\n", valueList);
+            //logger.Info(valuesQuery);
 
-            config.Database.TopicsIndicators.Save(topicsIndicatorsList, config.PersistenceManager);
+            //config.Database.TopicsIndicators.Save(topicsIndicatorsList, config.PersistenceManager);
         }
     }
 }
