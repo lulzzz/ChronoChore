@@ -40,9 +40,24 @@ namespace CountryInformationDB
         public string UserAgent { get; set; }
 
         /// <summary>
+        /// Accept headers
+        /// </summary>
+        public string Accept { get; set; }
+
+        /// <summary>
+        /// Timeout in milliseconds
+        /// </summary>
+        public int Timeout { get; set; }
+
+        /// <summary>
         /// Get or set the security protocol used by serivce point object
         /// </summary>
         public SecurityProtocolType SecurityProtocol { get; set; }
+
+        /// <summary>
+        /// retry delay in seconds
+        /// </summary>
+        public int RetryDelay { get; set; }
 
         #endregion Properties
 
@@ -61,6 +76,8 @@ namespace CountryInformationDB
             UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.119 Safari/5";
             SecurityProtocol = SecurityProtocolType.Ssl3 |
                 SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            Accept = "*/*";
+            Timeout = 1000000;
         }
 
         #endregion Constructor

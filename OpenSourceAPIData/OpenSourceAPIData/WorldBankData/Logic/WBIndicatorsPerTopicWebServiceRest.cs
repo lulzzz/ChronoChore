@@ -1,51 +1,65 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using OpenSourceAPIData.WorldBankData.Model;
 using log4net;
+using OpenSourceAPIData.Persistence.Logic;
 
 namespace OpenSourceAPIData.WorldBankData.Logic
 {
+    /// <summary>
+    /// Request for indicators data
+    /// </summary>
     public class WBIndicatorsPerTopicWebServiceRest : WBWebServiceRest<IndicatorsTable>
     {
         protected static ILog logger = LogManager.GetLogger(typeof(WBIndicatorsPerTopicWebServiceRest));
 
+        /// <summary>
+        /// The topic id for which the indicators are fetched
+        /// </summary>
         public int TopicId { get; set; }
-        public WBIndicatorsPerTopicWebServiceRest()
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="manager"></param>
+        /// <param name="db"></param>
+        public WBIndicatorsPerTopicWebServiceRest(int topicId, PersistenceManager manager, WorldBankOrgOSDatabase db)
+            : base(new WBWebServiceRestConfig())
         {
-            RootXPath = @"//wb:indicators";
-            XpathNodes = ".//wb:indicator";
+            TopicId = topicId;
+            config.UniqueName = "indicators";
+            config.RelativeUriPath = $"topics/{TopicId}/{config.UniqueName}";
+            config.RootXPath = $@"//wb:{config.UniqueName}";
+            config.XPathDataNodes = ".//wb:indicator";
+            config.PersistenceManager = manager;
+            config.Database = db;
         }
 
-        protected override void ReadNode(XmlNode node)
+        /// <summary>
+        /// Read the node
+        /// </summary>
+        /// <param name="node"></param>
+        protected override void ReadNode(string api, XmlNode node)
         {
-            var nameText = node.SelectSingleNode("./wb:name/text()", nsmgr);
-            var sourceText = node.SelectSingleNode("./wb:source/text()", nsmgr);
-            var sourceNoteText = node.SelectSingleNode(".//wb:sourceNote/text()", nsmgr);
-            var sourceOrganizationText = node.SelectSingleNode(".//wb:sourceOrganization/text()", nsmgr);
-            Result.Add(new IndicatorsTable
+            var nameText = node.SelectSingleNode("./wb:name/text()", namespaceManager);
+            var sourceText = node.SelectSingleNode("./wb:source/text()", namespaceManager);
+            var sourceNoteText = node.SelectSingleNode(".//wb:sourceNote/text()", namespaceManager);
+            var sourceOrganizationText = node.SelectSingleNode(".//wb:sourceOrganization/text()", namespaceManager);
+
+            var indicatorsData = new IndicatorsTable
             {
                 Id = node.Attributes["id"].Value,
                 TopicId = TopicId,
                 Name = nameText?.Value,
-                SourceId = Convert.ToInt32(node.SelectSingleNode("./wb:source", nsmgr).Attributes["id"].Value),
+                SourceId = Convert.ToInt32(node.SelectSingleNode("./wb:source", namespaceManager).Attributes["id"].Value),
                 Source = sourceText?.Value,
                 SourceNote = sourceNoteText?.Value,
                 SourceOrgaisation = sourceOrganizationText?.Value,
-            });
-        }
+            };
 
-        protected override void SetApi()
-        {
-            Api = $"https://api.worldbank.org/v2/topics/{TopicId}/indicators?{queryParamsForPage}";
-        }
+            logger.Info($"Read indicator id '{indicatorsData.Id} for Topic '{TopicId}' on request Uri '{api}'");
 
-        protected override string GetApi(string queryParams)
-        {
-            return $"https://api.worldbank.org/v2/topics/{TopicId}/indicators?{queryParams}";
+            Result.Add(indicatorsData);
         }
     }
 }

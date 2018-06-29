@@ -1,9 +1,7 @@
-﻿using OpenSourceAPIData.Persistence.Models;
-using OpenSourceAPIData.Persistence.Logic;
+﻿using OpenSourceAPIData.Persistence.Logic;
 
 namespace OpenSourceAPIData.WorldBankData.Model
 {
-    [DBTable]
     public class CountryTable : BaseTable<CountryTable>
     {
         public string ISO2Code { get; set; }

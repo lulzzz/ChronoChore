@@ -1,9 +1,7 @@
-﻿using OpenSourceAPIData.Persistence.Models;
-using OpenSourceAPIData.Persistence.Logic;
+﻿using OpenSourceAPIData.Persistence.Logic;
 
 namespace OpenSourceAPIData.WorldBankData.Model
 {
-    [DBDatabase]
     public class WorldBankOrgOSDatabase
     {
         public CountryTable Countries { get; set; }

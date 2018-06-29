@@ -1,64 +1,57 @@
-﻿using System.Data.SQLite;
+﻿using log4net;
+using System;
+using System.Data.SQLite;
+using System.IO;
 
 namespace OpenSourceAPIData.Persistence.Logic
 {
+    /// <summary>
+    /// A sqlite database context
+    /// </summary>
     public class SqlitePersistContext : DBContextBase
     {
-        public SqlitePersistContext(string topic) : base(topic) { }
-        
-        public override void Open()
-        {
-            connection = new SQLiteConnection(connectionString);
-            connection.Open();
-        }
+        protected static ILog logger = LogManager.GetLogger(typeof(SqlitePersistContext));
 
         /// <summary>
-        /// Close() method throws exception if already disposed
+        /// Constructor
         /// </summary>
-        public override void Close()
-        {
-            try
-            {
-                if (connection != null)
-                {
-                    connection.Close();
-                    connection = null;
-                }
-            }
-            finally { }
-        }
-
+        /// <param name="topic"></param>
+        public SqlitePersistContext(string topic) : base(topic) { }
+        
+        /// <summary>
+        /// Create the local database file
+        /// </summary>
+        /// <param name="databaseName"></param>
         public override void CreateDatabase(string databaseName)
         {
+            Directory.CreateDirectory(Topic);
             string fileName = $".\\{Topic}\\{databaseName}.sqlite";
             connectionString = $"Data Source={fileName};Version=3;ConnectTimeout=60;";
             SQLiteConnection.CreateFile(fileName);
         }
         
-        public void ExecuteNonQueryPrivate(string query)
-        {
-            var command = connection.CreateCommand();
-            command.CommandText = query;
-            command.ExecuteNonQuery();
-        }
-
+        /// <summary>
+        /// Execute a non query
+        /// </summary>
+        /// <param name="query"></param>
         public override void ExecuteNonQuery(string query)
         {
-            using (connection = new SQLiteConnection(connectionString))
+            try
             {
-                connection.Open();
-                ExecuteNonQueryPrivate(query);
-                connection.Close();
-            }
-        }
+                using (var connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
 
-        public override void Insert(string query)
-        {
-            using (connection = new SQLiteConnection(connectionString))
+                    var command = connection.CreateCommand();
+                    command.CommandText = query;
+                    command.ExecuteNonQuery();
+
+                    connection.Close();
+                }
+            }
+            catch(Exception ex)
             {
-                connection.Open();
-                ExecuteNonQueryPrivate(query);
-                connection.Close();
+                logger.Error($"Error in sqlite for query {query} \nExecute: {ex.Message} \nStack: {ex.StackTrace}");
             }
         }
     }

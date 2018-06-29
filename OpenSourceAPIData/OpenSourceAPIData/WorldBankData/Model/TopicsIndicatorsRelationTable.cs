@@ -1,11 +1,9 @@
 ﻿using OpenSourceAPIData.Persistence.Logic;
-using OpenSourceAPIData.Persistence.Models;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace OpenSourceAPIData.WorldBankData.Model
 {
-    [DBTable]
     public class TopicsIndicatorsRelationTable : BaseTable<TopicsIndicatorsRelationTable>
     {
         public int Id { get; set; }

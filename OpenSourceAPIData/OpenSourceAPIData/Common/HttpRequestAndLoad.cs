@@ -83,8 +83,8 @@ namespace WebScrap.Common
             httpWebRequestObj.ImpersonationLevel = configuration.ImpersonationLevel;
             httpWebRequestObj.KeepAlive = configuration.KeepAlive;
             httpWebRequestObj.UserAgent = configuration.UserAgent;
-            httpWebRequestObj.Accept = "*/*";
-            httpWebRequestObj.Timeout = 1000000;
+            httpWebRequestObj.Accept = configuration.Accept;
+            httpWebRequestObj.Timeout = configuration.Timeout;
         }
 
         /// <summary>
@@ -98,7 +98,6 @@ namespace WebScrap.Common
         private T Load<T>(string url, Func<WebResponse, T> fManipulateWebStream)
             where T : class
         {
-            logger.DebugFormat("Try to Load The Url: \"{0}\"", url);
             uriPath = new Uri(url);
 
             // escape proxy
@@ -122,8 +121,6 @@ namespace WebScrap.Common
             }
             else if (IsOnlineWebPage(url))
             {
-                logger.DebugFormat("This is a HTTP(S) url");
-
                 HttpWebResponse httpResponse = (HttpWebResponse)webResponseObj;
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {
@@ -147,8 +144,6 @@ namespace WebScrap.Common
             var stream = webResponseObj.GetResponseStream();
             var encoding = Encoding.UTF8;
 
-            logger.DebugFormat("Current Encoding of the document is {0}", encoding);
-
             using (var reader = new StreamReader(stream, encoding))
                 return reader.ReadToEnd();
         }
@@ -163,8 +158,6 @@ namespace WebScrap.Common
         {
             var stream = webResponseObj.GetResponseStream();
             var encoding = Encoding.UTF8;
-
-            logger.DebugFormat("Current Encoding of the document is {0}", encoding);
 
             return new StreamReader(stream, encoding);
         }
@@ -189,14 +182,15 @@ namespace WebScrap.Common
         /// <param name="xPath"></param>
         /// <returns></returns>
         public string Load(string url) => RetryLogic.Do(
-            () => Load(url, ManipulateWebStreamForPage), TimeSpan.FromSeconds(1));
+            () => Load(url, ManipulateWebStreamForPage), TimeSpan.FromSeconds(configuration.RetryDelay));
 
         /// <summary>
         /// Load a file from the online or offline
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public string LoadFile(string url) => Load(url, ManipulateWebStreamForPage);
+        public string LoadFile(string url) => RetryLogic.Do(
+            () => Load(url, ManipulateWebStreamForPage), TimeSpan.FromSeconds(configuration.RetryDelay));
 
         /// <summary>
         /// Load a file from the online or offline

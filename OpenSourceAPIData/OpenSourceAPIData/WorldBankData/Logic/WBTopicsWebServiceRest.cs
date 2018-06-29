@@ -1,47 +1,55 @@
 ﻿using OpenSourceAPIData.WorldBankData.Model;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Xml;
 using System.Linq;
 using log4net;
+using OpenSourceAPIData.Persistence.Logic;
 
 namespace OpenSourceAPIData.WorldBankData.Logic
 {
+    /// <summary>
+    /// Get the list of all topics which forms the first part of all the world bank type data
+    /// </summary>
     public class WBTopicsWebServiceRest : WBWebServiceRest<TopicsTable>
     {
         protected static ILog logger = LogManager.GetLogger(typeof(WBTopicsWebServiceRest));
 
-        public WBTopicsWebServiceRest()
+        /// <summary>
+        /// Initialize all the config values
+        /// </summary>
+        public WBTopicsWebServiceRest(PersistenceManager manager, WorldBankOrgOSDatabase db)
+            : base(new WBWebServiceRestConfig())
         {
-            RootXPath = @"//wb:topics";
-            XpathNodes = ".//wb:topic";
+            config.UniqueName = "topics";
+            config.RelativeUriPath = config.UniqueName;
+            config.RootXPath = $@"//wb:{config.UniqueName}";
+            config.XPathDataNodes = ".//wb:topic";
+            config.PersistenceManager = manager;
+            config.Database = db;
         }
 
-        protected override void ReadNode(XmlNode node)
+        /// <summary>
+        /// Parse individual node and save into result
+        /// </summary>
+        /// <param name="node"></param>
+        protected override void ReadNode(string api, XmlNode node)
         {
             var id = Convert.ToInt32(node.Attributes["id"].Value);
-            var valueText = node.SelectSingleNode(".//wb:value/text()", nsmgr);
-            var sourceNoteText = node.SelectSingleNode(".//wb:sourceNote/text()", nsmgr);
-            //Result.Add(new TopicsTable
-            //{
-            //    Id = Convert.ToInt32(node.Attributes["id"].Value),
-            //    Value = (valueText == null)? null: valueText.Value,
-            //    SourceNote = (sourceNoteText == null)? null:sourceNoteText.Value,
-            //});
-
-            Database.Topics.Save(new TopicsTable
+            var valueText = node.SelectSingleNode(".//wb:value/text()", namespaceManager);
+            var sourceNoteText = node.SelectSingleNode(".//wb:sourceNote/text()", namespaceManager);
+            
+            config.Database.Topics.Save(new TopicsTable
             {
                 Id = id,
                 Value = (valueText == null) ? null : valueText.Value,
                 SourceNote = (sourceNoteText == null) ? null : sourceNoteText.Value,
-            }, persistenceManager);
+            }, config.PersistenceManager);
 
             // For each topic fetch indicators
-            var indicatorsRestObj = new WBIndicatorsPerTopicWebServiceRest();
-            indicatorsRestObj.Database = Database;
-            indicatorsRestObj.persistenceManager = persistenceManager;
-            indicatorsRestObj.TopicId = id;
+            logger.Info($"Fetch all indicators for topic '{id}'");
+            var indicatorsRestObj = new WBIndicatorsPerTopicWebServiceRest(
+                id, config.PersistenceManager, config.Database);
             indicatorsRestObj.Read();
 
             // Topics and Indicators relation
@@ -49,7 +57,7 @@ namespace OpenSourceAPIData.WorldBankData.Logic
             foreach (var item in indicatorsRestObj.Result)
             {
                 logger.Info($"Save indicator id '{item.Id}' for topic '{id}'");
-                Database.Indicators.Save(item, persistenceManager);
+                config.Database.Indicators.Save(item, config.PersistenceManager);
                 topicsIndicatorsList.Add(new TopicsIndicatorsRelationTable()
                 {
                     IndicatorsId = item.Id,
@@ -61,17 +69,7 @@ namespace OpenSourceAPIData.WorldBankData.Logic
             var valuesQuery = string.Join("\n", valueList);
             logger.Info(valuesQuery);
 
-            Database.TopicsIndicators.Save(topicsIndicatorsList, persistenceManager);
-        }
-
-        protected override void SetApi()
-        {
-            Api = $"https://api.worldbank.org/v2/topics?{queryParamsForPage}";
-        }
-
-        protected override string GetApi(string queryParams)
-        {
-            return $"https://api.worldbank.org/v2/topics?{queryParams}";
+            config.Database.TopicsIndicators.Save(topicsIndicatorsList, config.PersistenceManager);
         }
     }
 }

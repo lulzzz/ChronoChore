@@ -64,27 +64,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\ConcurrentQueueService.cs" />
+    <Compile Include="Common\ForLoop.cs" />
+    <Compile Include="TaskQueue\ProducerConsumerService.cs" />
     <Compile Include="Common\HttpRequestAndLoad.cs" />
     <Compile Include="Common\HttpRequestConfiguration.cs" />
-    <Compile Include="Common\ProcessActionEventHandler.cs" />
+    <Compile Include="TaskQueue\QueueServiceEventHandler.cs" />
     <Compile Include="Common\RetryLogic.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Persistence\Logic\DBContextBase.cs" />
-    <Compile Include="Persistence\Logic\ExecuteSqliteQueriesQueue.cs" />
+    <Compile Include="Persistence\Logic\DbExecuteQueue.cs" />
     <Compile Include="Persistence\Logic\PersistenceManager.cs" />
     <Compile Include="Persistence\Logic\SqlitePersistContext.cs" />
-    <Compile Include="Persistence\Models\ColumnInformation.cs" />
-    <Compile Include="Persistence\Models\DBColumnAttribute.cs" />
-    <Compile Include="Persistence\Models\DBDatabaseAttribute.cs" />
-    <Compile Include="Persistence\Models\DBIgnoreAttribute.cs" />
-    <Compile Include="Persistence\Models\DBTableAttribute.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TaskQueue\QueueAction.cs" />
     <Compile Include="WorldBankData\Logic\WBIndicatorsPerTopicWebServiceRest.cs" />
+    <Compile Include="WorldBankData\Logic\WBResourceNodeInfo.cs" />
     <Compile Include="WorldBankData\Logic\WBTopicsWebServiceRest.cs" />
     <Compile Include="WorldBankData\Logic\WBWebServicePaging.cs" />
     <Compile Include="WorldBankData\Logic\WBWebServiceRest.cs" />
+    <Compile Include="WorldBankData\Logic\WBWebServiceRestConfig.cs" />
+    <Compile Include="WorldBankData\Logic\WBXmlResponseDocument.cs" />
     <Compile Include="WorldBankData\Model\BaseTable.cs" />
     <Compile Include="WorldBankData\Model\CountryTable.cs" />
     <Compile Include="WorldBankData\Model\IndicatorsTable.cs" />

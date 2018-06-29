@@ -1,14 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace OpenSourceAPIData.Common
 {
+    /// <summary>
+    /// A generic logic for retrying an action a number of times
+    /// </summary>
     public static class RetryLogic
     {
+        /// <summary>
+        /// For actions which do not return
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="retryInterval"></param>
+        /// <param name="maxAttemptCount"></param>
         public static void Do(
         Action action,
         TimeSpan retryInterval,
@@ -21,6 +27,14 @@ namespace OpenSourceAPIData.Common
             }, retryInterval, maxAttemptCount);
         }
 
+        /// <summary>
+        /// For actions that return
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="action"></param>
+        /// <param name="retryInterval"></param>
+        /// <param name="maxAttemptCount"></param>
+        /// <returns></returns>
         public static T Do<T>(
         Func<T> action,
         TimeSpan retryInterval,

@@ -2,6 +2,8 @@
 using OpenSourceAPIData.Persistence.Logic;
 using OpenSourceAPIData.WorldBankData.Logic;
 using OpenSourceAPIData.WorldBankData.Model;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace OpenSourceAPIData
 {
@@ -11,6 +13,15 @@ namespace OpenSourceAPIData
 
         static void Main(string[] args)
         {
+            logger.Info("Start the Open API application");
+
+            Process().Wait();
+
+            logger.Info("End the Open API application");
+        }
+
+        public static async Task Process()
+        {
             using (var persistenceManager = new PersistenceManager("WorldBank",
                 (topic) => new SqlitePersistContext(topic)))
             {
@@ -18,13 +29,14 @@ namespace OpenSourceAPIData
                 var databaseModel = new WorldBankOrgOSDatabase();
                 databaseModel.Create(persistenceManager);
 
-                var wbTopics = new WBTopicsWebServiceRest();
-                wbTopics.persistenceManager = persistenceManager;
-                wbTopics.Database = databaseModel;
-                wbTopics.Read();
-
-                //databaseModel.Topics.Save(wbTopics.Result, persistenceManager);
+                var wbTopics = new WBTopicsWebServiceRest(persistenceManager, databaseModel);
+                await wbTopics.Read();
             }
+        }
+
+        public static void WBWebServiceRestCompletionHandlerInMain<T>(string uniqueName, ConcurrentBag<T> Result)
+        {
+
         }
     }
 }
