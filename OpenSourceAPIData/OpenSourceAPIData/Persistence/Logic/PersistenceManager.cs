@@ -64,9 +64,14 @@ namespace OpenSourceAPIData.Persistence.Logic
         
         public void Dispose()
         {
+            Wait();
+            if (context != null) context.Close();
+        }
+
+        public void Wait()
+        {
             executeQueue.MarkCompleted = true;
             executeQueue.Wait();
-            if (context != null) context.Close();
         }
     }
 }

@@ -9,6 +9,7 @@ using OpenSourceAPIData.WorldBankData.Model;
 using WebScrap.Common;
 using OpenSourceAPIData.Common;
 using log4net;
+using Common.TaskQueue;
 
 namespace OpenSourceAPIData.WorldBankData.Logic
 {
@@ -26,10 +27,6 @@ namespace OpenSourceAPIData.WorldBankData.Logic
         protected WBWebServiceRestConfig config;
         
         protected XmlNamespaceManager namespaceManager;
-
-        public delegate void WBWebServiceRestCompletionHandler(string uniqueName, ConcurrentBag<T> Result);
-
-        public event WBWebServiceRestCompletionHandler RequestCompleted;
 
         /// <summary>
         /// Saves the page number
@@ -52,14 +49,16 @@ namespace OpenSourceAPIData.WorldBankData.Logic
         /// </summary>
         public ConcurrentBag<T> Result { get; set; }
 
+        protected ProducerConsumerService tasksConsumerService;
+
         /// <summary>
         /// Constructor
         /// </summary>
-        public WBWebServiceRest(WBWebServiceRestConfig config)
+        public WBWebServiceRest(ProducerConsumerService tasksConsumerService, WBWebServiceRestConfig config)
         {
             this.config = config;
             Result = new ConcurrentBag<T>();
-            RequestCompleted += Program.WBWebServiceRestCompletionHandlerInMain;
+            this.tasksConsumerService = tasksConsumerService;
         }
 
         /// <summary>
@@ -75,7 +74,7 @@ namespace OpenSourceAPIData.WorldBankData.Logic
         /// <summary>
         /// Read the function
         /// </summary>
-        public async Task Read()
+        public void Read()
         {
             // Request the first page
             var urlPage1 = GetApiPerPage(1);
@@ -89,19 +88,24 @@ namespace OpenSourceAPIData.WorldBankData.Logic
             ForLoop.Run(2, TotalPages, (i) => ApiRequestList.Add(GetApiPerPage(i)));
 
             // Tasks
-            var taskList = new List<Task>();
-            taskList.Add(new Task(() => ReadNodes(urlPage1, document.SelectNodes(config.XPathDataNodes, namespaceManager))));
+            //var taskList = new List<Task>();
+            tasksConsumerService.Enqueue(
+                () => ReadNodes(urlPage1, document.SelectNodes(config.XPathDataNodes, namespaceManager)));
             foreach (var api in ApiRequestList)
             {
-                taskList.Add(new Task(() => LoadAndRead(api)));
+                tasksConsumerService.Enqueue(() => LoadAndRead(api));
             }
 
-            await Task.WhenAll(taskList.ToArray());
+            //taskList.ForEach(task => task.Start());
+            //await Task.WhenAll(taskList.ToArray());
             //taskList.ForEach(task => task.Start());
 
-            RequestCompleted?.Invoke(config.UniqueName);
+            OnCompleted();
+            
             //Task.WaitAll(taskList.ToArray());
         }
+
+        protected virtual void OnCompleted() { }
 
         /// <summary>
         /// Load html and read and parse response

@@ -3,6 +3,9 @@ using System.Xml;
 using OpenSourceAPIData.WorldBankData.Model;
 using log4net;
 using OpenSourceAPIData.Persistence.Logic;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
+using Common.TaskQueue;
 
 namespace OpenSourceAPIData.WorldBankData.Logic
 {
@@ -18,13 +21,19 @@ namespace OpenSourceAPIData.WorldBankData.Logic
         /// </summary>
         public int TopicId { get; set; }
 
+        public delegate void WBIndicatorsPerTopicWebServiceRestCompletedHandler(string uniqueName, int topicId,
+            ConcurrentBag<IndicatorsTable> Result);
+
+        public event WBIndicatorsPerTopicWebServiceRestCompletedHandler RequestCompleted;
+
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="manager"></param>
         /// <param name="db"></param>
-        public WBIndicatorsPerTopicWebServiceRest(int topicId, PersistenceManager manager, WorldBankOrgOSDatabase db)
-            : base(new WBWebServiceRestConfig())
+        public WBIndicatorsPerTopicWebServiceRest(int topicId, PersistenceManager manager, WorldBankOrgOSDatabase db,
+            ProducerConsumerService tasksConsumerService)
+            : base(tasksConsumerService, new WBWebServiceRestConfig())
         {
             TopicId = topicId;
             config.UniqueName = "indicators";
@@ -33,6 +42,13 @@ namespace OpenSourceAPIData.WorldBankData.Logic
             config.XPathDataNodes = ".//wb:indicator";
             config.PersistenceManager = manager;
             config.Database = db;
+
+            RequestCompleted += Program.WBIndicatorsPerTopicWebServiceRestCompleted;
+        }
+
+        protected override void OnCompleted()
+        {
+            tasksConsumerService.Enqueue(() => RequestCompleted?.Invoke(config.UniqueName, TopicId, Result));
         }
 
         /// <summary>

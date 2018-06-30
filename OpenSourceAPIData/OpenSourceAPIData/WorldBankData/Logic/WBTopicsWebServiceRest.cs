@@ -5,6 +5,9 @@ using System.Xml;
 using System.Linq;
 using log4net;
 using OpenSourceAPIData.Persistence.Logic;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
+using Common.TaskQueue;
 
 namespace OpenSourceAPIData.WorldBankData.Logic
 {
@@ -15,11 +18,16 @@ namespace OpenSourceAPIData.WorldBankData.Logic
     {
         protected static ILog logger = LogManager.GetLogger(typeof(WBTopicsWebServiceRest));
 
+        public delegate void WBTopicsWebServiceRestCompletedHandler(string uniqueName, ConcurrentBag<TopicsTable> Result);
+
+        public event WBTopicsWebServiceRestCompletedHandler RequestCompleted;
+
         /// <summary>
         /// Initialize all the config values
         /// </summary>
-        public WBTopicsWebServiceRest(PersistenceManager manager, WorldBankOrgOSDatabase db)
-            : base(new WBWebServiceRestConfig())
+        public WBTopicsWebServiceRest(PersistenceManager manager, WorldBankOrgOSDatabase db, 
+            ProducerConsumerService tasksConsumerService)
+            : base(tasksConsumerService, new WBWebServiceRestConfig())
         {
             config.UniqueName = "topics";
             config.RelativeUriPath = config.UniqueName;
@@ -27,6 +35,13 @@ namespace OpenSourceAPIData.WorldBankData.Logic
             config.XPathDataNodes = ".//wb:topic";
             config.PersistenceManager = manager;
             config.Database = db;
+
+            RequestCompleted += Program.WBTopicsWebServiceRestCompleted;
+        }
+
+        protected override void OnCompleted()
+        {
+            tasksConsumerService.Enqueue(() => RequestCompleted?.Invoke(config.UniqueName, Result));
         }
 
         /// <summary>
@@ -38,18 +53,18 @@ namespace OpenSourceAPIData.WorldBankData.Logic
             var id = Convert.ToInt32(node.Attributes["id"].Value);
             var valueText = node.SelectSingleNode(".//wb:value/text()", namespaceManager);
             var sourceNoteText = node.SelectSingleNode(".//wb:sourceNote/text()", namespaceManager);
-            
-            //config.Database.Topics.Save(new TopicsTable
-            //{
-            //    Id = id,
-            //    Value = (valueText == null) ? null : valueText.Value,
-            //    SourceNote = (sourceNoteText == null) ? null : sourceNoteText.Value,
-            //}, config.PersistenceManager);
+
+            Result.Add(new TopicsTable
+            {
+                Id = id,
+                Value = (valueText == null) ? null : valueText.Value,
+                SourceNote = (sourceNoteText == null) ? null : sourceNoteText.Value,
+            });
 
             // For each topic fetch indicators
             logger.Info($"Fetch all indicators for topic '{id}'");
             var indicatorsRestObj = new WBIndicatorsPerTopicWebServiceRest(
-                id, config.PersistenceManager, config.Database);
+                id, config.PersistenceManager, config.Database, programAllTasks);
             indicatorsRestObj.Read();
 
             //// Topics and Indicators relation
