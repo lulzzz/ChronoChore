@@ -50,10 +50,10 @@ namespace OpenSourceAPIData
 
                 tasksConsumerService.Wait();
 
-                while (programAllTasks.Any(t => !t.IsCompleted))
-                {
-                    await Task.WhenAll(programAllTasks.ToArray());
-                }
+                //while (programAllTasks.Any(t => !t.IsCompleted))
+                //{
+                //    await Task.WhenAll(programAllTasks.ToArray());
+                //}
 
                 var persistenceTaskList = new List<Task>();
                 foreach (var item in persistenceManagerList)

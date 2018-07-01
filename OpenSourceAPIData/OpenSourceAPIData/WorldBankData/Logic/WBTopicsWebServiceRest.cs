@@ -64,7 +64,7 @@ namespace OpenSourceAPIData.WorldBankData.Logic
             // For each topic fetch indicators
             logger.Info($"Fetch all indicators for topic '{id}'");
             var indicatorsRestObj = new WBIndicatorsPerTopicWebServiceRest(
-                id, config.PersistenceManager, config.Database, programAllTasks);
+                id, config.PersistenceManager, config.Database, tasksConsumerService);
             indicatorsRestObj.Read();
 
             //// Topics and Indicators relation
