@@ -41,17 +41,17 @@ namespace WBOpenSource
         /// Parse individual node and save into result
         /// </summary>
         /// <param name="node"></param>
-        protected override void ReadNode(string api, XmlNode node)
+        protected override void ReadNode(WBWebArgs args)
         {
-            var id = Convert.ToInt32(node.Attributes["id"].Value);
-            var valueText = node.SelectSingleNode(".//wb:value/text()", namespaceManager);
-            var sourceNoteText = node.SelectSingleNode(".//wb:sourceNote/text()", namespaceManager);
+            var id = args.XmlParser.GetAttributeInt("id");
+            var valueText = args.XmlParser.GetTextImmutable(".//wb:value/text()");
+            var sourceNoteText = args.XmlParser.GetTextImmutable(".//wb:sourceNote/text()");
 
             Result.Add(new TopicsTable
             {
                 Id = id,
-                Value = (valueText == null) ? null : valueText.Value,
-                SourceNote = (sourceNoteText == null) ? null : sourceNoteText.Value,
+                Value = valueText,
+                SourceNote = sourceNoteText,
             });
 
             // For each topic fetch indicators

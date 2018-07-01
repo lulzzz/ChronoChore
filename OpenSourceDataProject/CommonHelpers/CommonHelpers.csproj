@@ -49,6 +49,7 @@
     <Compile Include="Extenders\TypeExtensions.cs" />
     <Compile Include="Logic\ForLoop.cs" />
     <Compile Include="Logic\RetryLogic.cs" />
+    <Compile Include="Parser\XmlParserWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Web\HttpRequestAndLoad.cs" />
     <Compile Include="Web\HttpRequestConfiguration.cs" />

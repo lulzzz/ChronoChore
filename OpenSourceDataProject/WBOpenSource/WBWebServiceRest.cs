@@ -51,6 +51,11 @@ namespace WBOpenSource
             this.config = config;
             Result = new ConcurrentBag<T>();
             TotalPages = -1;
+            taskQueue = new ActionBlock<WBWebArgs>(args => LoadAndRead(args),
+                new ExecutionDataflowBlockOptions()
+                {
+                    MaxDegreeOfParallelism = DataflowBlockOptions.Unbounded,
+                });
         }
 
         /// <summary>
@@ -135,17 +140,20 @@ namespace WBOpenSource
         /// <param name="nodes"></param>
         protected virtual void ReadNodes(WBWebArgs args)
         {
-            foreach (XmlNode node in args.XmlParser.nodes)
+            Parallel.ForEach(args.XmlParser.nodes, (node) =>
             {
-                ReadNode(args.urlPage, node);
-            }
+                ReadNode(new WBWebArgs(){
+                    urlPage = args.urlPage,
+                    XmlParser = new XmlParserWrapper(node)
+                });
+            });
         }
 
         /// <summary>
         /// Override the node
         /// </summary>
         /// <param name="node"></param>
-        protected virtual void ReadNode(string api, XmlNode node) { }
+        protected virtual void ReadNode(WBWebArgs args) { }
 
         /// <summary>
         /// Download the resposne and parse into xml document
