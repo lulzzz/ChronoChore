@@ -53,6 +53,8 @@
   <ItemGroup>
     <Compile Include="Model\TopicsTable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WBOpenSourceContext.cs" />
+    <Compile Include="WBPersistence.cs" />
     <Compile Include="WBTopicsWebServiceRest.cs" />
     <Compile Include="WBWebArgs.cs" />
     <Compile Include="WBWebCompletedArgs.cs" />
@@ -67,6 +69,10 @@
     <ProjectReference Include="..\CommonHelpers\CommonHelpers.csproj">
       <Project>{31e4c17a-021f-4197-bc9e-272aebe97b48}</Project>
       <Name>CommonHelpers</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PersistenceManagement\PersistenceManagement.csproj">
+      <Project>{0b063031-d3dd-496e-8350-eeaea6f1cd02}</Project>
+      <Name>PersistenceManagement</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
