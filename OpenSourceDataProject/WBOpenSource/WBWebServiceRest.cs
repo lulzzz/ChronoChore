@@ -43,10 +43,13 @@ namespace WBOpenSource
         /// </summary>
         public ConcurrentBag<T> Result { get; set; }
 
+        protected BatchBlock<T> batchResultBlock;
+        protected ActionBlock<T[]> persistenceAction;
+
         /// <summary>
         /// Constructor
         /// </summary>
-        public WBWebServiceRest(WBWebServiceRestConfig config)
+        public WBWebServiceRest(WBWebServiceRestConfig config, Action<T[]> action)
         {
             this.config = config;
             Result = new ConcurrentBag<T>();
@@ -56,6 +59,13 @@ namespace WBOpenSource
                 {
                     MaxDegreeOfParallelism = DataflowBlockOptions.Unbounded,
                 });
+
+            batchResultBlock = new BatchBlock<T>(80);
+            persistenceAction = new ActionBlock<T[]>(action);
+            batchResultBlock.LinkTo(persistenceAction);
+
+            // When the batch block completes, set the action block also to complete.
+            batchResultBlock.Completion.ContinueWith(delegate { persistenceAction.Complete(); });
         }
 
         /// <summary>
@@ -103,6 +113,9 @@ namespace WBOpenSource
             taskQueue.Complete();
             taskQueue.Completion.Wait();
 
+            batchResultBlock.Complete();
+            persistenceAction.Completion.Wait();
+
             OnCompleted();
         }
 
@@ -122,7 +135,7 @@ namespace WBOpenSource
         /// Load html and read and parse response
         /// </summary>
         /// <param name="api"></param>
-        protected virtual void LoadAndRead(WBWebArgs args)
+        protected virtual T[] LoadAndRead(WBWebArgs args)
         {
             if (args.XmlParser == null)
             {
@@ -132,6 +145,8 @@ namespace WBOpenSource
 
             // Read Topics Nodes
             ReadNodes(args);
+
+            return Result.ToArray();
         }
 
         /// <summary>

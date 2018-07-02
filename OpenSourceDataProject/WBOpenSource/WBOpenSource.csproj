@@ -51,8 +51,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\IndicatorsTable.cs" />
     <Compile Include="Model\TopicsTable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WBIndicatorsPerTopicWebServiceRest.cs" />
     <Compile Include="WBOpenSourceContext.cs" />
     <Compile Include="WBPersistence.cs" />
     <Compile Include="WBTopicsWebServiceRest.cs" />

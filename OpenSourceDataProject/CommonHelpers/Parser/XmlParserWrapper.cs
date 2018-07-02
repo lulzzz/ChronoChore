@@ -27,6 +27,7 @@ namespace CommonHelpers.Parser
 
         public XmlParserWrapper(XmlNode node)
         {
+            document = node.OwnerDocument;
             namespaceManager = new XmlNamespaceManager(document.NameTable);
             namespaceManager.AddNamespace("wb", document.DocumentElement.NamespaceURI);
             nodes = new List<XmlNode>()
@@ -56,14 +57,24 @@ namespace CommonHelpers.Parser
             return nodes[currentIndex].Attributes[attrName]?.Value;
         }
 
+        public string GetAttribute(string xpath, string attrName)
+        {
+            return nodes[currentIndex].SelectSingleNode(xpath, namespaceManager).Attributes[attrName]?.Value;
+        }
+
         public int GetAttributeInt(string attrName)
         {
-            return Convert.ToInt32(nodes[currentIndex].Attributes[attrName]?.Value);
+            return Convert.ToInt32(GetAttribute(attrName));
+        }
+
+        public int GetAttributeInt(string xpath, string attrName)
+        {
+            return Convert.ToInt32(GetAttribute(xpath, attrName));
         }
 
         public string GetTextImmutable(string xpath)
         {
-            return nodes[currentIndex].SelectSingleNode(xpath).Value;
+            return nodes[currentIndex].SelectSingleNode(xpath, namespaceManager)?.Value;
         }
     }
 }

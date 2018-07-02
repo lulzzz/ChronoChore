@@ -83,6 +83,8 @@ namespace CommonHelpers.Web
                 SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             Accept = "*/*";
             Timeout = 1000000;
+            RetryDelay = 1;
+            RetryCount = 3;
         }
 
         #endregion Constructor

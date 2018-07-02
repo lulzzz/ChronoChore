@@ -16,25 +16,17 @@ namespace WBOpenSource
     public class WBTopicsWebServiceRest : WBWebServiceRest<TopicsTable>
     {
         private static ILog logger = LogManager.GetLogger(typeof(WBTopicsWebServiceRest));
-
-        //public delegate void WBTopicsWebServiceRestCompletedHandler(string uniqueName, ConcurrentBag<TopicsTable> Result);
         
-
         /// <summary>
         /// Initialize all the config values
         /// </summary>
-        public WBTopicsWebServiceRest(/*PersistenceManager manager, WorldBankOrgOSDatabase db,*/)
-            : base(new WBWebServiceRestConfig())
+        public WBTopicsWebServiceRest(Action<TopicsTable[]> action) : base(new WBWebServiceRestConfig(), action)
         {
             config.UniqueName = "topics";
             config.RelativeUriPath = config.UniqueName;
             config.RootXPath = $@"//wb:{config.UniqueName}";
             config.XPathDataNodes = ".//wb:topic";
             AbsoluteUrl = new Uri(new Uri(config.BaseApi), config.RelativeUriPath).AbsoluteUri;
-            //config.PersistenceManager = manager;
-            //config.Database = db;
-
-            //RequestCompleted += Program.WBTopicsWebServiceRestCompleted;
         }
 
         /// <summary>
@@ -47,18 +39,12 @@ namespace WBOpenSource
             var valueText = args.XmlParser.GetTextImmutable(".//wb:value/text()");
             var sourceNoteText = args.XmlParser.GetTextImmutable(".//wb:sourceNote/text()");
 
-            Result.Add(new TopicsTable
+            batchResultBlock.SendAsync(new TopicsTable
             {
                 Id = id,
                 Value = valueText,
                 SourceNote = sourceNoteText,
             });
-
-            // For each topic fetch indicators
-            //logger.Info($"Fetch all indicators for topic '{id}'");
-            //var indicatorsRestObj = new WBIndicatorsPerTopicWebServiceRest(
-            //    id, config.PersistenceManager, config.Database, tasksConsumerService);
-            //indicatorsRestObj.Read();
         }
     }
 }
