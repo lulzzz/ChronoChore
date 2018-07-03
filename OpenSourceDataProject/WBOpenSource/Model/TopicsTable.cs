@@ -32,5 +32,10 @@ namespace WBOpenSource.Model
         {
             return queryValue?.Replace("'", "''");
         }
+
+        internal static string SelectTopicIds()
+        {
+            return $"SELECT {nameof(Id)} FROM {nameof(TopicsTable)}";
+        }
     }
 }

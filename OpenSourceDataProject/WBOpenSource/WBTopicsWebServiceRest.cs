@@ -39,7 +39,7 @@ namespace WBOpenSource
             var valueText = args.XmlParser.GetTextImmutable(".//wb:value/text()");
             var sourceNoteText = args.XmlParser.GetTextImmutable(".//wb:sourceNote/text()");
 
-            batchResultBlock.SendAsync(new TopicsTable
+            batchResultBlock.Post(new TopicsTable
             {
                 Id = id,
                 Value = valueText,

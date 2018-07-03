@@ -48,5 +48,45 @@ namespace PersistenceManagement
                 logger.Error($"Error in sqlite for query {query} \nExecute: {ex.Message} \nStack: {ex.StackTrace}");
             }
         }
+
+        public override List<string[]> ExecuteQuery(string query)
+        {
+            try
+            {
+                using (var connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
+
+                    var command = connection.CreateCommand();
+                    command.CommandText = query;
+
+                    var resultList = new List<string[]>();
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var columns = new string[reader.FieldCount];
+
+                            for (int i = 0; i < columns.Length; i++)
+                            {
+                                columns[i] = reader.GetValue(i).ToString();
+                            }
+
+                            resultList.Add(columns);
+                        }
+                    }
+
+                    connection.Close();
+
+                    return resultList;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error($"Error in sqlite for query {query} \nExecute: {ex.Message} \nStack: {ex.StackTrace}");
+            }
+
+            return null;
+        }
     }
 }

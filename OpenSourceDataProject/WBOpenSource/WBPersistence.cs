@@ -18,7 +18,7 @@ namespace WBOpenSource
 
         DBContextBase dBContext;
 
-        protected ActionBlock<string> taskQueue;
+        public ActionBlock<string> taskQueue;
 
         public WBPersistence(Func<DBContextBase> contextBuilder)
         {
@@ -32,21 +32,41 @@ namespace WBOpenSource
         {
             dBContext.CreateDatabase(databaseName, path);
 
-            taskQueue.SendAsync(TopicsTable.CreateQuery());
+            taskQueue.Post(TopicsTable.CreateQuery());
         }
 
         internal void Insert(TopicsTable[] result)
         {
             var query = TopicsTable.InsertQuery(result);
 
-            taskQueue.SendAsync(query);
+            taskQueue.Post(query);
         }
 
         internal void Insert(IndicatorsTable[] result)
         {
             var query = IndicatorsTable.InsertQuery(result);
 
-            taskQueue.SendAsync(query);
+            taskQueue.Post(query);
+        }
+
+        internal List<string> GetTopicsIdList()
+        {
+            var query = TopicsTable.SelectTopicIds();
+
+            var results = dBContext.ExecuteQuery(query);
+
+            var topicsIds = new List<string>();
+            for (int i = 0; i < results.Count; i++)
+            {
+                topicsIds.Add(results[i][0]);
+            }
+
+            return topicsIds;
+        }
+
+        internal void Wait()
+        {
+            taskQueue.Completion.Wait();
         }
     }
 }

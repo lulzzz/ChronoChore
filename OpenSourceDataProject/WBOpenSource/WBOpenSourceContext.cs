@@ -25,6 +25,8 @@ namespace WBOpenSource
             var topicsRestService = new WBTopicsWebServiceRest((items) => persistence.Insert(items));
             topicsRestService.RequestCompleted += TopicsRestService_RequestCompleted;
             topicsRestService.Read();
+
+            persistence.Wait();
         }
 
         private void CreateStore()
@@ -36,12 +38,13 @@ namespace WBOpenSource
 
         private void TopicsRestService_RequestCompleted(WBWebCompletedArgs<TopicsTable> args)
         {
-            //persistence.Insert(args.Result);
+            var topicsIds = persistence.GetTopicsIdList();
 
             var indicatorsTasks = new List<Task>();
-            foreach (var item in args.Result)
+            foreach (var item in topicsIds)
             {
-                var indicatorsWebRequest = new WBIndicatorsPerTopicWebServiceRest(item.Id, (items) => persistence.Insert(items));
+                var indicatorsWebRequest = new WBIndicatorsPerTopicWebServiceRest(
+                    Convert.ToInt32(item), (items) => persistence.Insert(items));
                 indicatorsWebRequest.RequestCompleted += IndicatorsWebRequest_RequestCompleted;
                 indicatorsTasks.Add(Task.Factory.StartNew(() => indicatorsWebRequest.Read()));
             }
@@ -51,7 +54,7 @@ namespace WBOpenSource
 
         private void IndicatorsWebRequest_RequestCompleted(WBWebCompletedArgs<IndicatorsTable> args)
         {
-            //persistence.Insert(args.Result);
+            persistence.taskQueue.Complete();
         }
     }
 }

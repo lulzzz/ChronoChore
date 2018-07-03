@@ -41,6 +41,8 @@ namespace PersistenceManagement
         /// <param name="query"></param>
         public virtual void Insert(string query) { }
 
+        public virtual List<string[]> ExecuteQuery(string query) { return null; }
+
         public void Dispose() { }
     }
 }

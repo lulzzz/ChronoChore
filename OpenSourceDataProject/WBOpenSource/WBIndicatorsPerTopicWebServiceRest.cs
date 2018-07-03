@@ -55,7 +55,7 @@ namespace WBOpenSource
 
             //logger.Info($"Read indicator id '{indicatorsData.Id} for Topic '{TopicId}' on request Uri '{args.urlPage}'");
 
-            batchResultBlock.SendAsync(indicatorsData);
+            batchResultBlock.Post(indicatorsData);
         }
     }
 }
