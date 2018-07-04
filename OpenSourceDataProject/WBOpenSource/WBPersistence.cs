@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using PersistenceManagement;
 using WBOpenSource.Model;
 using System.Threading.Tasks.Dataflow;
+using System.IO;
 
 namespace WBOpenSource
 {
@@ -33,6 +34,7 @@ namespace WBOpenSource
             dBContext.CreateDatabase(databaseName, path);
 
             taskQueue.Post(TopicsTable.CreateQuery());
+            taskQueue.Post(IndicatorsTable.CreateQuery());
         }
 
         internal void Insert(TopicsTable[] result)
@@ -44,6 +46,14 @@ namespace WBOpenSource
 
         internal void Insert(IndicatorsTable[] result)
         {
+            // Debug file
+            var csvText = "";
+            foreach (var item in result)
+            {
+                csvText += IndicatorsTable.GetCsvRow(item) + Environment.NewLine;
+            }
+            File.WriteAllText(Path.Combine("log", Guid.NewGuid().ToString()), csvText);
+
             var query = IndicatorsTable.InsertQuery(result);
 
             taskQueue.Post(query);
